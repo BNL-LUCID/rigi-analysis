@@ -1,0 +1,31 @@
+# Python dependencies for the SV analysis pipeline (final codes SV/)
+#
+# Tested with Python 3.9-3.11. Install with:
+#   pip install -r requirements.txt
+#
+# External (non-Python) tools required upstream of this pipeline:
+#   - Manta 1.6.0     (somatic SV calling)        — see install_manta.txt
+#   - AnnotSV 3.3     (SV annotation, full mode)  — see install_annotsv.txt
+#   - samtools >=1.10 (BAM handling for Manta)
+#
+# External (non-Python) data required by 11_fetch_annotations.py:
+#   - gnomAD v2.1.1 LoF metrics file
+#       gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz
+#     Download from https://gnomad.broadinstitute.org/downloads
+
+# Core scientific stack
+numpy>=1.23
+pandas>=1.5
+scipy>=1.10
+
+# Plotting (figures + supplementary)
+matplotlib>=3.6
+seaborn>=0.12
+
+# Out-of-core processing — used by 05_sv_mutation_correlation.py
+# (the central INV-DBS enrichment analysis, runs on multi-GB merged tables)
+# and 06_sv_type_specific_decay.py (optional fast path).
+dask[dataframe]>=2023.1.0
+
+# MyGene.info REST API queries — used by 11_fetch_annotations.py
+requests>=2.28
