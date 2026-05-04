@@ -110,5 +110,4 @@ QC outputs.
 
 - [`docs/PATTERNS.md`](docs/PATTERNS.md) — pattern encoding and category definitions
 - [`docs/FILE_FORMATS.md`](docs/FILE_FORMATS.md) — column schemas at each step
-- [`docs/QC.md`](docs/QC.md) — sanity-check snippets after each step
 - [`docs/PARALLEL.md`](docs/PARALLEL.md) — parallel helper caveats
