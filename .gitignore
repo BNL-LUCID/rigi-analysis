@@ -1,5 +1,29 @@
-.DS_Store
-*.log
-__pycache__/
+
+# Python
+__pycache__
 .ipynb_checkpoints/
 *.pyc
+
+# Package build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+
+# IDEs
+.idea/
+.vscode/
+
+# Virtual environments
+.venv/
+.env/
+venv/
+env/
+
+# System
+.DS_Store
+*.log
+
+# Version file
+src/rigi_analysis/_version.py
