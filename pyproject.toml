@@ -21,14 +21,13 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.23",
     "pandas>=1.5",
@@ -41,8 +40,9 @@ dependencies = [
     "joblib",
     "SigProfilerMatrixGenerator>=1.2.25",
     "SigProfilerExtractor>=1.1.24",
-    "radical.asyncflow>=0.3.1",
-    "rhapsody-py[dask]>=0.2.0"
+    # Workflow orchestration
+    "radical.asyncflow~=0.4.0",
+    "rhapsody-py[dask]~=0.3.1"
 ]
 
 [project.optional-dependencies]
@@ -54,7 +54,6 @@ gpu = [
 ]
 
 dev = [
-    "black",
     "pytest>=7",
     "pytest-cov",
     "ruff",
@@ -74,7 +73,6 @@ write_to = "src/rigi_analysis/_version.py"
 
 [tool.ruff]
 line-length = 80
-target-version = ["py39", "py310", "py311", "py312", "py313"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "D"]
