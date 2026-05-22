@@ -51,11 +51,31 @@ class TestSVPipelineInit:
         assert pipeline.mega_threshold == '50000000'
 
     def test_annotsv_dirs(self, pipeline):
-        assert pipeline.annotsv_dir == '/data/annotsv'
-        assert pipeline.annotsv_control_dir == '/data/annotsv_control'
+        assert pipeline.annotsv_dir == './annotsv'
+        assert pipeline.annotsv_control_dir == './annotsv_control'
 
     def test_dbs_mutation_dir_derived(self, pipeline):
-        assert pipeline.dbs_mutation_dir.endswith('DBS')
+        # By default derived from mutation_merged_dir
+        expected = os.path.join(pipeline.mutation_merged_dir, 'DBS')
+        assert pipeline.dbs_mutation_dir == expected
+
+    def test_missing_optional_config_keys(self, tmp_path):
+        import copy
+        from conftest import SV_CONFIG, _MockWorkflowEngine
+        
+        cfg = copy.deepcopy(SV_CONFIG)
+        cfg.pop('windows', None)
+        cfg.pop('single_window', None)
+        
+        flow = _MockWorkflowEngine()
+        pipe = SVPipeline(
+            name='test-missing-keys',
+            config=cfg,
+            flow=flow,
+            output_dir=str(tmp_path / 'out'),
+        )
+        assert pipe.windows == '10,25,50,100'
+        assert pipe.single_window is None
 
 
 class TestSVTaskRegistration:
@@ -98,12 +118,12 @@ class TestSVCommandStrings:
     def test_filter_pass_rad(self, pipeline):
         cmd = self._run(pipeline.stage_filter_pass_rad())
         assert 'rigi-analysis-run filter_pass' in cmd
-        assert '-i /data/annotsv' in cmd
+        assert '-i ./annotsv' in cmd
 
     def test_filter_pass_ctl(self, pipeline):
         cmd = self._run(pipeline.stage_filter_pass_ctl())
         assert 'rigi-analysis-run filter_pass' in cmd
-        assert '-i /data/annotsv_control' in cmd
+        assert '-i ./annotsv_control' in cmd
 
     def test_sv_temporal(self, pipeline):
         cmd = self._run(pipeline.stage_sv_temporal())

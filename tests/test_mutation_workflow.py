@@ -47,8 +47,27 @@ class TestMutationPipelineInit:
     def test_doses_from_config(self, pipeline):
         assert pipeline.doses == ['dA', 'dB']
 
-    def test_genome_build(self, pipeline):
+    def test_genome_build_and_ref(self, pipeline):
         assert pipeline.genome_build == 'hg38'
+        assert pipeline.sigprofiler_ref == 'GRCh38'
+
+    def test_missing_optional_config_keys(self, tmp_path):
+        import copy
+        from conftest import MUTATION_CONFIG, _MockWorkflowEngine
+        
+        cfg = copy.deepcopy(MUTATION_CONFIG)
+        cfg.pop('mutation_types', None)
+        cfg.pop('doses', None)
+        
+        flow = _MockWorkflowEngine()
+        pipe = MutationPipeline(
+            name='test-missing-keys',
+            config=cfg,
+            flow=flow,
+            output_dir=str(tmp_path / 'out'),
+        )
+        assert pipe.mutation_types == []
+        assert pipe.doses == []
 
 
 class TestMutationTaskRegistration:
@@ -87,7 +106,7 @@ class TestMutationCommandStrings:
     def test_sigprofiler_cmd(self, pipeline):
         cmd = self._run(pipeline.stage_sigprofiler())
         assert 'rigi-analysis-run sigprofiler' in cmd
-        assert '-i /data/vcf_files' in cmd
+        assert '-i ./vcf_files' in cmd
         assert '-r GRCh38' in cmd
 
     def test_mutation_preprocessing_cmd(self, pipeline):

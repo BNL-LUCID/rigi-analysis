@@ -63,11 +63,11 @@ class MutationPipeline:
         self.doses = self.cfg.get('doses', [])
 
         self.annotations_dir = self.cfg.get('annotations_dir')
-        assert (os.path.exists(self.annotations_dir),
-                f'Provided "annotations_dir" does not exist')
+        assert os.path.exists(self.annotations_dir), \
+            'Provided "annotations_dir" does not exist'
         self.vcf_dir = self.cfg.get('vcf_dir')
-        assert (os.path.exists(self.vcf_dir),
-                f'Provided "vcf_dir" does not exist')
+        assert os.path.exists(self.vcf_dir), \
+            'Provided "vcf_dir" does not exist'
         self.sigprofiler_out_dir = os.path.join(
             self.output_dir, 'sigprofiler_output')
         self.processed_data_dir = os.path.join(

@@ -12,12 +12,22 @@ import sys
 import types
 from unittest.mock import MagicMock
 
+import pytest
+
+@pytest.fixture(autouse=True)
+def ensure_event_loop():
+    """Ensure every test has a valid event loop."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    yield loop
+    loop.close()
+
 
 # ── Minimal config fixtures ──────────────────────────────────────────
 
 MUTATION_CONFIG = {
-    'vcf_dir': '/data/vcf_files',
-    'annotations_dir': '/data/annotations',
+    'vcf_dir': './vcf_files',
+    'annotations_dir': './annotations',
     'mutation_types': ['SNV', 'DBS'],
     'doses': ['dA', 'dB'],
     'genome_build': 'hg38',
@@ -26,10 +36,10 @@ MUTATION_CONFIG = {
 }
 
 SV_CONFIG = {
-    'annotsv_dir': '/data/annotsv',
-    'annotsv_control_dir': '/data/annotsv_control',
-    'mutation_merged_dir': '/data/mutation/merged',
-    'gnomad_file': '/data/gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz',
+    'annotsv_dir': './annotsv',
+    'annotsv_control_dir': './annotsv_control',
+    'mutation_merged_dir': './mutation/merged',
+    'gnomad_file': './gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz',
     'sv_tolerance': 1000,
     'windows': '10,25,50,100',
     'single_window': 10,
@@ -38,15 +48,15 @@ SV_CONFIG = {
 }
 
 FULL_CONFIG = {
-    'vcf_dir': '/data/vcf_files',
-    'annotations_dir': '/data/annotations',
+    'vcf_dir': './vcf_files',
+    'annotations_dir': './annotations',
     'mutation_types': ['SNV'],
     'doses': ['dA'],
     'genome_build': 'hg38',
     'sigprofiler_ref': 'GRCh38',
-    'annotsv_dir': '/data/annotsv',
-    'annotsv_control_dir': '/data/annotsv_control',
-    'gnomad_file': '/data/gnomad.bgz',
+    'annotsv_dir': './annotsv',
+    'annotsv_control_dir': './annotsv_control',
+    'gnomad_file': './gnomad.bgz',
     'sv_tolerance': 1000,
     'windows': '10,25,50,100',
     'single_window': 10,
@@ -91,7 +101,11 @@ class _TaskRecorder:
         def wrapper(*args, **kwargs):
             # Return an asyncio.Task so the handle can be awaited
             # multiple times and passed as a dependency arg
-            loop = asyncio.get_event_loop()
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
             return loop.create_task(_inner(*args, **kwargs))
 
         wrapper.__name__ = fn.__name__
@@ -119,6 +133,20 @@ def install_mock_radical():
 
     Must be called **before** importing any workflow module.
     """
+    # Mock os.path.exists to bypass missing folder checks in dry-run tests
+    # only for mock paths, allowing pytest tmp_path/makedirs to work normally.
+    import os
+    original_exists = os.path.exists
+    def mock_exists(path):
+        p_str = str(path)
+        if ('pytest' in p_str or 
+            p_str.startswith('/private') or 
+            p_str.startswith('/var') or 
+            p_str.startswith('/tmp')):
+            return original_exists(path)
+        return True
+    os.path.exists = mock_exists
+
     # radical.asyncflow
     radical = types.ModuleType('radical')
     radical_asyncflow = types.ModuleType('radical.asyncflow')
@@ -134,7 +162,7 @@ def install_mock_radical():
     rhapsody = types.ModuleType('rhapsody')
     rhapsody_backends = types.ModuleType('rhapsody.backends')
 
-    async def _mock_backend(desc):
+    async def _mock_backend(*args, **kwargs):
         return MagicMock()
 
     rhapsody_backends.DaskExecutionBackend = _mock_backend

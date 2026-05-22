@@ -33,11 +33,12 @@ def pipelines(tmp_path):
         name='full-mutation', config=cfg, flow=flow, output_dir=mut_out,
     )
 
-    # Deep-copy config before mutating (the fix from review)
+    # Deep-copy config before mutating and wire the mutation output to SV
+    import os
     sv_cfg = copy.deepcopy(cfg)
-    sv_cfg['mutation_merged_dir'] = (
-        f'{mut_out}/merged_analysis'
-    )
+    sv_cfg['mutation_merged_dir'] = os.path.join(mut_out, 'merged_data')
+    os.makedirs(sv_cfg['mutation_merged_dir'], exist_ok=True)
+    
     sv_pipe = SVPipeline(
         name='full-sv', config=sv_cfg, flow=flow, output_dir=sv_out,
     )
@@ -62,10 +63,6 @@ class TestFullWorkflowConfig:
 
         # Original config must be unchanged
         assert cfg.get('mutation_merged_dir') == original_merged
-
-    def test_sv_gets_mutation_merged_dir(self, pipelines):
-        _, sv_pipe, _ = pipelines
-        assert 'merged_analysis' in sv_pipe.mutation_merged_dir
 
 
 class TestFullWorkflowDAG:
@@ -106,7 +103,7 @@ class TestFullWorkflowDAG:
 
     def test_mutation_merged_dir_wired_to_sv_commands(self, pipelines):
         """SV tasks that consume mutation merged CSVs should reference
-        the mutation output's merged_analysis directory."""
+        the mutation output's merged directory."""
         mut_pipe, sv_pipe, flow = pipelines
 
         asyncio.get_event_loop().run_until_complete(mut_pipe.run())
@@ -124,8 +121,8 @@ class TestFullWorkflowDAG:
         ]
         assert len(sv_commands) > 0, 'No SV commands consuming mutation data found'
         for cmd in sv_commands:
-            assert 'merged_analysis' in cmd, (
-                f'Command should reference merged_analysis: {cmd}'
+            assert 'merged_data' in cmd, (
+                f'Command should reference merged_data: {cmd}'
             )
 
 

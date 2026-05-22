@@ -66,21 +66,23 @@ class SVPipeline:
                 mutation_output_dir or \
                 os.path.join(self.output_dir, '..', 'out_mutation'),
                 'merged_data')
-        assert (os.path.exists(self.mutation_merged_dir),
-                f'Provided "mutation_merged_dir" does not exist')
+        assert os.path.exists(self.mutation_merged_dir), \
+            'Provided "mutation_merged_dir" does not exist'
 
         self.sv_tolerance = str(self.cfg.get('sv_tolerance', '1000'))
         self.windows = str(self.cfg.get('windows', '10,25,50,100'))
         self.single_window = self.cfg.get('single_window')
         self.mega_threshold = self.cfg.get('mega_threshold')
+        if self.mega_threshold is not None:
+            self.mega_threshold = str(self.mega_threshold)
         self.gnomad_file = self.cfg.get('gnomad_file')
 
         self.annotsv_dir = self.cfg.get('annotsv_dir')
         self.annotsv_control_dir = self.cfg.get('annotsv_control_dir')
-        assert (os.path.exists(self.annotsv_dir),
-                f'Provided "annotsv_dir" does not exist')
-        assert (os.path.exists(self.annotsv_control_dir),
-                f'Provided "annotsv_control_dir" does not exist')
+        assert os.path.exists(self.annotsv_dir), \
+            'Provided "annotsv_dir" does not exist'
+        assert os.path.exists(self.annotsv_control_dir), \
+            'Provided "annotsv_control_dir" does not exist'
 
         self.annotsv_passed_dir = os.path.join(
             self.output_dir, 'annotsv_passed')
@@ -113,14 +115,14 @@ class SVPipeline:
             """Stage 1a — PASS filter on radiation AnnotSV outputs."""
             return ('rigi-analysis-run filter_pass'
                     f' -i {self.annotsv_dir}'
-                    f' -o {self.annotsv_passed}')
+                    f' -o {self.annotsv_passed_dir}')
 
         @self.flow.executable_task
         async def stage_filter_pass_ctl(*args):
             """Stage 1b — PASS filter on control AnnotSV outputs."""
             return ('rigi-analysis-run filter_pass'
                     f' -i {self.annotsv_control_dir}'
-                    f' -o {self.annotsv_passed_control}')
+                    f' -o {self.annotsv_passed_control_dir}')
 
         # -- Stage 2-4: Temporal + Landscape + Repeat ------------------
 
@@ -267,9 +269,9 @@ class SVPipeline:
         @self.flow.executable_task
         async def stage_dose_visualize(*args):
             """Stage 14 — Dose-response figure (Fig 5)."""
-            low_csv = os.path.join(self.dose_stratified, 
+            low_csv = os.path.join(self.dose_stratified_dir, 
                                    'inv_dbs_pairs_low.csv')
-            high_csv = os.path.join(self.dose_stratified, 
+            high_csv = os.path.join(self.dose_stratified_dir, 
                                     'inv_dbs_pairs_high.csv')
             cat_csv = os.path.join(self.output_dir, 
                                    'categorized_genes.csv')

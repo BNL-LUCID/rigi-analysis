@@ -9,6 +9,11 @@ build/
 dist/
 *.egg-info/
 .eggs/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
 .pytest_cache/
 
 # IDEs
