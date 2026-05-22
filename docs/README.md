@@ -69,13 +69,13 @@ All three workflows read a single JSON configuration file (`-c`). All pipeline p
   "mutation_types": ["SNV", "DBS", "ID", "MNS"],  // required
   "doses": ["dA", "dB", "dC", "dD", "dE"],        // required
   
-  "annotsv_dir": "./annotsv",
-  "annotsv_control_dir": "./annotsv_control",
-  "gnomad_file": "./gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz",
+  "annotsv_dir": "./annotsv",                     // required
+  "annotsv_control_dir": "./annotsv_control",     // required
   "sv_tolerance": 1000,
   "windows": "10,25,50,100",
   "single_window": 10,
   "mega_threshold": 50000000,
+  "gnomad_file": "./gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz",
   "run_description": {}
 }
 ```
@@ -84,8 +84,8 @@ All three workflows read a single JSON configuration file (`-c`). All pipeline p
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `annotations_dir` | `str` | `<cwd>/annotations` | Directory for interval-tree annotation caches |
-| `vcf_dir` | `str` | `<cwd>/vcf_files` | Input directory containing raw VCF files (Mutect2 output) |
+| `annotations_dir` | `str` | `"<cwd>/annotations"` | Directory for interval-tree annotation caches |
+| `vcf_dir` | `str` | `"<cwd>/vcf_files"` | Input directory containing raw VCF files (Mutect2 output) |
 | `genome_build` | `str` | `"hg38"` | Genome build for annotation preprocessing |
 | `sigprofiler_ref` | `str` | `"GRCh38"` | SigProfiler reference genome identifier |
 | `mutation_types` | `list[str]` | `["SNV","DBS","ID","MNS"]` | Mutation types to process |
@@ -96,12 +96,11 @@ All three workflows read a single JSON configuration file (`-c`). All pipeline p
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `annotsv_dir` | `str` | `"<cwd>/annotsv"` | Input directory of AnnotSV-annotated TSVs (radiation) |
-| `annotsv_control_dir` | `str` | `"./annotsv_control"` | Input directory of AnnotSV-annotated TSVs (control) |
-| `mutation_merged_dir` | `str` | `"../mutation/merged"` | Merged mutation CSVs from mutation pipeline |
-| `gnomad_file` | `str` | `"./gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz"` | gnomAD pLI constraint file |
-| `output_dir` | `str` | `<cwd>/out_sv` | Root output directory |
+| `annotsv_control_dir` | `str` | `"<cwd>/annotsv_control"` | Input directory of AnnotSV-annotated TSVs (control) |
 | `sv_tolerance` | `int` | `1000` | Breakpoint position tolerance (bp) for cross-timepoint SV matching |
 | `windows` | `str` | `"10,25,50,100"` | Comma-separated breakpoint-proximal window sizes (bp) |
+| `mutation_merged_dir` | `str` | `"../out_mutation/merged_data"` | Merged mutation CSVs from mutation pipeline (not needed for a full workflow run) |
+| `gnomad_file` | `str` | `"<cwd>/gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz"` | gnomAD pLI constraint file |
 | `single_window` | `int` | `10` | Single window size for dose-stratified and concordance analyses |
 | `mega_threshold` | `int` | `50000000` | Inversion size threshold (bp) for mega-inversion classification |
 
@@ -134,10 +133,10 @@ out_mutation/
 │   ├── <TYPE>/all_<TYPE>_annotated.pkl
 │   └── ...
 ├── pattern_analysis/                # Temporal pattern CSVs (stage 4)
-│   ├── <TYPE>/mutation_annotations_dose_<dose>_<TYPE>.csv
+│   ├── <TYPE>/mutation_annotations_dose_<DOSE>_<TYPE>.csv
 │   └── ...
 ├── merged_analysis/                 # ★ Handover to SV pipeline (stage 5)
-│   ├── <TYPE>_dose_<dose>_merged.csv
+│   ├── <TYPE>_dose_<DOSE>_merged.csv
 │   └── ...
 ├── sankey_flows/                    # Trajectory JSONs (stage 6)
 │   ├── <TYPE>/combined/all_chromosomes_trajectories.json

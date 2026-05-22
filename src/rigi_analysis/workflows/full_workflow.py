@@ -76,9 +76,6 @@ async def run_workflow() -> None:
         # Deep-copy config for SV pipeline so we don't corrupt the
         # original; then wire the mutation merged dir into it
         sv_cfg = copy.deepcopy(cfg)
-        # TODO: temporary remove mutational_merged_dir from config
-        # sv_cfg['mutation_merged_dir'] = os.path.join(
-        #     mut_out, 'merged_analysis')
         sv_pipe = SVPipeline(
             name='full-sv-pipe', 
             config=sv_cfg, 

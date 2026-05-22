@@ -49,7 +49,7 @@ v2.1.1) are documented in [`install.md`](install.md).
 
 Assumes raw AnnotSV outputs are organised into parallel directories
 for radiation and control samples. Mutation-side merged
-CSVs at `../mutation/merged/` or similar.
+CSVs at `../out_mutation/merged_data/` or similar.
 
 ```bash
 # Step 1: PASS filter (run once per upstream directory)

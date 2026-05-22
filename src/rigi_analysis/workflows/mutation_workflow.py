@@ -64,10 +64,10 @@ class MutationPipeline:
 
         self.annotations_dir = self.cfg.get('annotations_dir')
         assert (os.path.exists(self.annotations_dir),
-                f'annotations_dir {self.annotations_dir} does not exist')
+                f'Provided "annotations_dir" does not exist')
         self.vcf_dir = self.cfg.get('vcf_dir')
         assert (os.path.exists(self.vcf_dir),
-                f'vcf_dir {self.vcf_dir} does not exist')
+                f'Provided "vcf_dir" does not exist')
         self.sigprofiler_out_dir = os.path.join(
             self.output_dir, 'sigprofiler_output')
         self.processed_data_dir = os.path.join(
@@ -199,8 +199,8 @@ class MutationPipeline:
 
         DAG:
             annotation_preprocessing ──┐
-            sigprofiler ──► preprocessing ──┤
-                                            ├──► annotation(×N)
+            sigprofiler ──► preprocessing ──┐
+                                            └──► annotation(×N)
                                                   ├──► pattern ──► merge
                                                   └──► compute_sankey ──► render_sankey
         """
