@@ -29,12 +29,13 @@ async def get_backend(run_description: dict):
     """Create and return an execution backend instance.
 
     Args:
-        run_description: Dictionary with resource, runtime, sandbox,
-            and any backend-specific keys consumed by the chosen
-            backend class.
+        run_description: Dictionary with backend-specific keys
+            consumed by the chosen backend class.
+            (For example for ``DaskExecutionBackend``:
+            ``n_workers=2``, ``threads_per_worker=4``)
 
     Returns:
         An initialised backend ready to be passed to
         ``WorkflowEngine.create(backend=...)``.
     """
-    return await _BACKEND_CLASS(run_description)
+    return await _BACKEND_CLASS(**run_description)

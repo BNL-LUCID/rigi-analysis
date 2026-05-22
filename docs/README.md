@@ -35,24 +35,22 @@ The analysis framework is divided into two primary pipelines that meet at an int
 
 ## Workflow Entry Points
 
-Three workflow entry points are provided as console scripts. Each launches an async DAG of pipeline stages via RADICAL asyncflow, backed by the execution engine configured in [`backend.py`](../src/rigi_analysis/workflows/backend.py) (default: `DaskExecutionBackend`).
+Three workflow entry points are provided as console scripts. Each launches async pipeline stages via RADICAL tools, backed by the execution engine configured in [`backend.py`](../src/rigi_analysis/workflows/backend.py) (default: `DaskExecutionBackend`).
 
 | Command | Module | Description |
 |---------|--------|-------------|
-| `rigi-analysis-workflow` | `full_workflow:main` | Runs mutation → SV sequentially in a single session |
-| `rigi-analysis-workflow-mutation` | `mutation_workflow:main` | Runs the mutation pipeline only |
+| `rigi-analysis-workflow` | `full_workflow:main` | Runs Mutation → SV pipelines sequentially in a single session |
+| `rigi-analysis-workflow-mutation` | `mutation_workflow:main` | Runs the Mutation pipeline only |
 | `rigi-analysis-workflow-sv` | `sv_workflow:main` | Runs the SV pipeline only |
 
 All three accept the same CLI flags:
 
 ```
 -c, --config-file   JSON configuration file (required)
--w, --work-dir      Workspace for session sandboxes
 -o, --output-dir    Top-level output directory
--t, --runtime       Requested runtime in minutes
 ```
 
-The per-stage script dispatcher is still available via `rigi-analysis-run <script_name>` for manual step-by-step execution.
+The per-stage script dispatcher is available via `rigi-analysis-run <script_name>` for manual step-by-step execution.
 
 ---
 
@@ -64,12 +62,13 @@ All three workflows read a single JSON configuration file (`-c`). All pipeline p
 
 ```json
 {
-  "vcf_dir": "/data/vcf_files",
-  "annotations_dir": "/data/annotations",
-  "mutation_types": ["SNV", "DBS", "ID", "MNS"],
-  "doses": ["dA", "dB", "dC", "dD", "dE"],
+  "annotations_dir": "./annotations",             // required
+  "vcf_dir": "./vcf_files",                       // required
   "genome_build": "hg38",
   "sigprofiler_ref": "GRCh38",
+  "mutation_types": ["SNV", "DBS", "ID", "MNS"],  // required
+  "doses": ["dA", "dB", "dC", "dD", "dE"],        // required
+  
   "annotsv_dir": "./annotsv",
   "annotsv_control_dir": "./annotsv_control",
   "gnomad_file": "./gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz",
@@ -85,19 +84,18 @@ All three workflows read a single JSON configuration file (`-c`). All pipeline p
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `vcf_dir` | `str` | `"vcf_files"` | Input directory containing raw VCF files (Mutect2 output) |
-| `annotations_dir` | `str` | `<output_dir>/annotations` | Directory for interval-tree annotation caches |
-| `output_dir` | `str` | `<cwd>/out_mutation` | Root output directory |
-| `mutation_types` | `list[str]` | `["SNV","DBS","ID","MNS"]` | Mutation types to process |
-| `doses` | `list[str]` | `["dA","dB","dC","dD","dE"]` | Dose labels for merge step |
+| `annotations_dir` | `str` | `<cwd>/annotations` | Directory for interval-tree annotation caches |
+| `vcf_dir` | `str` | `<cwd>/vcf_files` | Input directory containing raw VCF files (Mutect2 output) |
 | `genome_build` | `str` | `"hg38"` | Genome build for annotation preprocessing |
 | `sigprofiler_ref` | `str` | `"GRCh38"` | SigProfiler reference genome identifier |
+| `mutation_types` | `list[str]` | `["SNV","DBS","ID","MNS"]` | Mutation types to process |
+| `doses` | `list[str]` | `["dA","dB","dC","dD","dE"]` | Dose labels for merge step |
 
 #### SV Workflow Keys
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `annotsv_dir` | `str` | `"./annotsv"` | Input directory of AnnotSV-annotated TSVs (radiation) |
+| `annotsv_dir` | `str` | `"<cwd>/annotsv"` | Input directory of AnnotSV-annotated TSVs (radiation) |
 | `annotsv_control_dir` | `str` | `"./annotsv_control"` | Input directory of AnnotSV-annotated TSVs (control) |
 | `mutation_merged_dir` | `str` | `"../mutation/merged"` | Merged mutation CSVs from mutation pipeline |
 | `gnomad_file` | `str` | `"./gnomad.v2.1.1.lof_metrics.by_transcript.txt.bgz"` | gnomAD pLI constraint file |
@@ -113,7 +111,7 @@ Uses both mutation and SV keys from the same config. The full workflow automatic
 
 #### `run_description` — Backend Configuration
 
-Nested dict passed directly to the execution backend. Contents are backend-specific (e.g., resource, runtime). The workflow CLI's `-t`/`--runtime` and `-w`/`--work-dir` flags inject `runtime` and `sandbox` keys into this dict automatically.
+Nested dict passed directly to the execution backend. Contents are backend-specific (e.g., resource, runtime, n_workers, threads_per_worker, etc.).
 
 ---
 
@@ -122,33 +120,30 @@ Nested dict passed directly to the execution backend. Contents are backend-speci
 **Command:** `rigi-analysis-workflow-mutation -c config.json -o out_mutation`
 
 ```
+annotations/                         # Interval-tree caches (stage 1a)
+vcf_files/                           # Raw VCFs from Mutect2 pipeline 
+└── output/vcf_files/                # Parsed SigProfiler outputs into per-type pickles
+
 out_mutation/
-├── annotations/                     # Interval-tree caches (stage 1a)
 ├── sigprofiler_output/              # SigProfiler matrices & seqinfo (stage 1b)
-│   └── output/vcf_files/            #   └── per-type subdirs (SNV/, DBS/, ...)
-├── processed_data/                  # Parsed per-type pickles (stage 2)
-│   ├── all_SNV_mutations.pkl
-│   ├── all_DBS_mutations.pkl
-│   ├── all_ID_mutations.pkl
-│   └── all_MNS_mutations.pkl
 ├── summary_data/                    # Per-type annotation summaries (stage 2)
+├── processed_data/                  # Parsed per-type pickles (stage 2)
+│   ├── all_<TYPE>_mutations.pkl
+│   └── ...
 ├── annotated_mutations/             # Genomic-annotated pickles (stage 3)
-│   ├── SNV/all_SNV_annotated.pkl
-│   ├── DBS/all_DBS_annotated.pkl
-│   ├── ID/all_ID_annotated.pkl
-│   └── MNS/all_MNS_annotated.pkl
+│   ├── <TYPE>/all_<TYPE>_annotated.pkl
+│   └── ...
 ├── pattern_analysis/                # Temporal pattern CSVs (stage 4)
-│   ├── SNV/mutation_annotations_dose_<dose>_SNV.csv
-│   ├── DBS/ ...
+│   ├── <TYPE>/mutation_annotations_dose_<dose>_<TYPE>.csv
 │   └── ...
 ├── merged_analysis/                 # ★ Handover to SV pipeline (stage 5)
-│   ├── SNV_dose_dA_merged.csv
-│   ├── DBS_dose_dA_merged.csv
+│   ├── <TYPE>_dose_<dose>_merged.csv
 │   └── ...
 ├── sankey_flows/                    # Trajectory JSONs (stage 6)
-│   └── <TYPE>/combined/all_chromosomes_trajectories.json
+│   ├── <TYPE>/combined/all_chromosomes_trajectories.json
+│   └── ...
 └── sankey_figures/                  # Sankey PNGs (stage 7)
-    ├── SNV_combined.png
+    ├── <TYPE>_combined.png
     └── ...
 ```
 
@@ -156,8 +151,8 @@ out_mutation/
 
 ```
 annotation_preprocessing ──┐
-sigprofiler ──► preprocessing ──┤
-                                ├──► annotation(×N) ──┬──► pattern ──► merge
+sigprofiler ──► preprocessing ──┐
+                                └──► annotation(×N) ──┬──► pattern ──► merge
                                                       └──► compute_sankey ──► render_sankey
 ```
 
@@ -223,9 +218,9 @@ Composes both pipelines sequentially. The mutation pipeline runs to completion f
 
 ```
 out_full/
-├── mutation_output/        # Full mutation directory tree (see above)
+├── out_mutation/        # Full Mutation directory tree (see above)
 │   └── merged_analysis/    # ★ auto-wired to SV pipeline
-└── sv_output/              # Full SV directory tree (see above)
+└── out_sv/              # Full SV directory tree (see above)
 ```
 
 ---
@@ -281,7 +276,7 @@ The workflow execution backend is configured centrally in [`backend.py`](../src/
 |---------|--------|----------|
 | `DaskExecutionBackend` | `rhapsody.backends` | **Default.** Dask Distributed cluster |
 | `RadicalExecutionBackend` | `rhapsody.backends` | RADICAL-Pilot on HPC (requires `rhapsody-py[radical_pilot]`) |
-| `DragonExecutionBackendV3` | `rhapsody.backends` | Dragon runtime |
+| `DragonExecutionBackendV3` | `rhapsody.backends` | DragonHPC runtime |
 | `Concurrent` | `rhapsody.backends` | Thread / process pool |
 
 ## Citation

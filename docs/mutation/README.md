@@ -93,14 +93,14 @@ rigi-analysis-run mutation_preprocessing \
     --output processed_data \
     --summary summary_data
 
-# Steps 4-6 per mutation type
+# Steps 3-5 per mutation type
 for mut_type in SNV DBS ID MNS; do
     rigi-analysis-run mutation_annotation \
         -m processed_data/all_${mut_type}_mutations.pkl \
         -a annotations -b hg38 \
         -o annotated_mutations/${mut_type}
     
-    # Step 5 expects all_<TYPE>_annotated.pkl naming
+    # Step 4 expects all_<TYPE>_annotated.pkl naming
     mv annotated_mutations/${mut_type}/annotated_mutations.pkl \
        annotated_mutations/${mut_type}/all_${mut_type}_annotated.pkl
     
@@ -117,7 +117,7 @@ for mut_type in SNV DBS ID MNS; do
         --doses dA dB dC dD dE
 done
 
-# Step 7: Sankey figures
+# Step 6-7: Sankey figures
 for mut_type in SNV DBS ID MNS; do
     rigi-analysis-run compute_sankey \
         --input annotated_mutations/${mut_type}/all_${mut_type}_annotated.pkl \

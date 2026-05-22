@@ -36,6 +36,7 @@ class SVPipeline:
             config: dict,
             flow: WorkflowEngine,
             output_dir: Optional[str] = None,
+            mutation_output_dir: Optional[str] = None,
     ):
         """Initialize the SV pipeline.
 
@@ -45,12 +46,13 @@ class SVPipeline:
                 parameters as top-level keys.
             flow: WorkflowEngine instance from RADICAL tools.
             output_dir: Directory to write results to (overrides config).
+            mutation_output_dir: Directory with the results of
+                the Mutation pipeline.
         """
         self.flow = flow
         self.name = name
 
         self.cfg = config
-        self.cfg_file = config.get('cfg_file', '')
 
         self.output_dir = (
             output_dir
@@ -58,6 +60,14 @@ class SVPipeline:
                             os.path.join(CURRENT_DIR, 'out_sv'))
         )
         os.makedirs(self.output_dir, exist_ok=True)
+
+        self.mutation_output_dir = mutation_output_dir or \
+            os.path.join(self.output_dir, '..', 'out_mutation')
+        if not os.path.exists(self.mutation_output_dir):
+            raise ValueError(
+                'Mutation output directory not found: '
+                f'{self.mutation_output_dir}'
+            )
 
         # Directories & inputs
         self.annotsv_dir = self.cfg.get('annotsv_dir', './annotsv')
@@ -421,24 +431,16 @@ class SVPipeline:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description='Workflow application for SV Pipeline',
-        usage='rigi-analysis-run sv_workflow [options]',
-    )
-    parser.add_argument(
-        '-w', '--work-dir', dest='work_dir', type=str, required=False,
-        help='workspace for workflow session sandboxes',
-    )
-    parser.add_argument(
-        '-o', '--output-dir', dest='output_dir', type=str, required=False,
-        help='directory path for output',
+        description='Workflow application for RIGI SV Pipeline',
+        usage='rigi-analysis-workflow-sv [options]',
     )
     parser.add_argument(
         '-c', '--config-file', dest='config_file', type=str, required=True,
         help='configuration file with the workflow description',
     )
     parser.add_argument(
-        '-t', '--runtime', dest='runtime', type=int, required=False,
-        help='requested runtime (min) for the workflow to run',
+        '-o', '--output-dir', dest='output_dir', type=str, required=False,
+        help='directory path for workflow output',
     )
     return parser.parse_args(sys.argv[1:])
 
@@ -451,26 +453,20 @@ async def run_workflow() -> None:
     with open(config_file, 'r') as f:
         cfg = json.load(f)
 
-    cfg['cfg_file'] = config_file
-
     init_default_logger()
 
-    sandbox_path = os.path.abspath(args.work_dir or CURRENT_DIR)
-    run_description = dict(
-        **cfg.get('run_description', {}), sandbox=sandbox_path)
-    if args.runtime:
-        run_description['runtime'] = int(args.runtime)
-
-    backend = await get_backend(run_description)
+    backend = await get_backend(cfg.get('run_description', {}))
     flow = await WorkflowEngine.create(backend=backend)
 
     try:
         p = SVPipeline(
-            name='sv-pipe', config=cfg, flow=flow,
+            name='sv-pipe',
+            config=cfg,
+            flow=flow,
             output_dir=args.output_dir,
         )
         results = await p.run()
-        print(f'Pipeline results: {results}')
+        print(f'{datetime_now()} SV pipeline results: {results}')
     except Exception:
         raise
     finally:

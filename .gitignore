@@ -27,3 +27,6 @@ env/
 
 # Version file
 src/rigi_analysis/_version.py
+
+# System
+.tools/

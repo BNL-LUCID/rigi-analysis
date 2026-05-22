@@ -26,24 +26,16 @@ CURRENT_DIR = os.getcwd()
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description='Workflow application for Full RIGI Pipeline',
-        usage='rigi-analysis-run full_workflow [options]',
-    )
-    parser.add_argument(
-        '-w', '--work-dir', dest='work_dir', type=str, required=False,
-        help='workspace for workflow session sandboxes',
-    )
-    parser.add_argument(
-        '-o', '--output-dir', dest='output_dir', type=str, required=False,
-        help='directory path for output',
+        description='Workflow application for All RIGI Pipelines',
+        usage='rigi-analysis-workflow [options]',
     )
     parser.add_argument(
         '-c', '--config-file', dest='config_file', type=str, required=True,
         help='configuration file with the workflow description',
     )
     parser.add_argument(
-        '-t', '--runtime', dest='runtime', type=int, required=False,
-        help='requested runtime (min) for the workflow to run',
+        '-o', '--output-dir', dest='output_dir', type=str, required=False,
+        help='directory path for workflow output',
     )
     return parser.parse_args(sys.argv[1:])
 
@@ -60,45 +52,39 @@ async def run_workflow() -> None:
     with open(config_file, 'r') as f:
         cfg = json.load(f)
 
-    cfg['cfg_file'] = config_file
-
     init_default_logger()
 
-    sandbox_path = os.path.abspath(args.work_dir or CURRENT_DIR)
-    run_description = dict(
-        **cfg.get('run_description', {}), sandbox=sandbox_path)
-    if args.runtime:
-        run_description['runtime'] = int(args.runtime)
-
-    backend = await get_backend(run_description)
+    backend = await get_backend(cfg.get('run_description', {}))
     flow = await WorkflowEngine.create(backend=backend)
 
     # General output dir for full workflow
-    out_dir = (
-        args.output_dir
-        or cfg.get(
-            'output_dir', os.path.join(CURRENT_DIR, 'out_full'))
-    )
+    out_dir = args.output_dir or cfg.get('output_dir', CURRENT_DIR)
     os.makedirs(out_dir, exist_ok=True)
 
-    mut_out = os.path.join(out_dir, 'mutation_output')
-    sv_out = os.path.join(out_dir, 'sv_output')
+    out_mutation_dir = os.path.join(out_dir, 'out_mutation')
+    out_sv_dir = os.path.join(out_dir, 'out_sv')
 
     try:
         # Build mutation pipeline from original config
         mut_pipe = MutationPipeline(
-            name='full-mutation-pipe', config=cfg, flow=flow,
-            output_dir=mut_out,
+            name='full-mutation-pipe', 
+            config=cfg, 
+            flow=flow,
+            output_dir=out_mutation_dir,
         )
 
         # Deep-copy config for SV pipeline so we don't corrupt the
         # original; then wire the mutation merged dir into it
         sv_cfg = copy.deepcopy(cfg)
-        sv_cfg['mutation_merged_dir'] = os.path.join(
-            mut_out, 'merged_analysis')
+        # TODO: temporary remove mutational_merged_dir from config
+        # sv_cfg['mutation_merged_dir'] = os.path.join(
+        #     mut_out, 'merged_analysis')
         sv_pipe = SVPipeline(
-            name='full-sv-pipe', config=sv_cfg, flow=flow,
-            output_dir=sv_out,
+            name='full-sv-pipe', 
+            config=sv_cfg, 
+            flow=flow,
+            output_dir=out_sv_dir,
+            mutation_output_dir=out_mutation_dir,
         )
 
         print(f'{datetime_now()} Full Pipeline started')
