@@ -29,7 +29,8 @@ tests/              # Dry-run workflow tests (no HPC required)
 
 The two pipelines meet at an intermediate artefact: dose-merged mutation
 tables (`*_dose_*_merged.csv`) produced by the `mutation` half and consumed
-by the `sv` half. **Run the `mutation` pipeline first, then the `sv` pipeline.**
+by the `sv` half. **Run the `mutation` pipeline first, then the `sv` pipeline, 
+or run the full workflow only, which will do both for you.**
 
 ## Setup
 
@@ -45,13 +46,13 @@ For GPU-accelerated SigProfiler runs, install the optional `gpu` extra:
 pip install -e ".[gpu]"
 ```
 
-Full documentation, including external tool setup (Mutect2, Manta, AnnotSV)
-and pipeline run instructions, is in [`docs/`](docs/README.md).
+Full documentation, including external tool setup (`Mutect2`, `Manta`, 
+`AnnotSV`) and pipeline run instructions, is in [`docs/`](docs/README.md).
 
 ## Citation
 
 If you use this pipeline, please cite the manuscript above. Upstream 
-tools (Mutect2, SigProfiler, Manta, AnnotSV) should also be cited 
+tools (`Mutect2`, `SigProfiler`, `Manta`, `AnnotSV`) should also be cited 
 separately — see the manuscript References section.
 
 ## Funding
