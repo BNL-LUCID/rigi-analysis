@@ -40,6 +40,8 @@ dependencies = [
     "joblib",
     "SigProfilerMatrixGenerator>=1.2.25",
     "SigProfilerExtractor>=1.1.24",
+    # Pythonic wrapper for HTSlib C-API
+    "pysam",
     # Workflow orchestration
     "radical.asyncflow~=0.4.0",
     "rhapsody-py[dask]~=0.3.1"
@@ -61,6 +63,7 @@ dev = [
 
 [project.scripts]
 rigi-analysis-run = "rigi_analysis.utils.cli:main"
+rigi-analysis-vcf-decompress = "rigi_analysis.utils.decompress_vcf:main"
 rigi-analysis-workflow = "rigi_analysis.workflows.full_workflow:main"
 rigi-analysis-workflow-mutation = "rigi_analysis.workflows.mutation_workflow:main"
 rigi-analysis-workflow-sv = "rigi_analysis.workflows.sv_workflow:main"

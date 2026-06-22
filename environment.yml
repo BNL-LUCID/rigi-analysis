@@ -1,6 +1,7 @@
 name: rigi_analysis
 channels:
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - python=3.10
@@ -16,6 +17,8 @@ dependencies:
   - pytorch
   - torchaudio
   - torchvision
+  - bioconda::htslib
+  - bioconda::pysam
   # Dev dependencies
   - pytest>=7
   - pytest-cov
