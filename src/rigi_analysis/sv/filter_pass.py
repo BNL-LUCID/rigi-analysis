@@ -47,10 +47,27 @@ def filter_annotsv_file(input_path, output_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Filter AnnotSV files to PASS calls only')
-    parser.add_argument('--input-dir', required=True, help='Directory containing AnnotSV files')
-    parser.add_argument('--output-dir', required=True, help='Output directory for filtered files')
-    parser.add_argument('--pattern', default='*_annotated.tsv', help='File pattern to match (default: *_annotated.tsv)')
+    parser = argparse.ArgumentParser(
+        description='Filter AnnotSV files to PASS calls only'
+    )
+    parser.add_argument(
+        '-i',
+        '--input-dir',
+        required=True,
+        help='Directory containing AnnotSV files'
+    )
+    parser.add_argument(
+        '-o',
+        '--output-dir',
+        required=True,
+        help='Output directory for filtered files'
+    )
+    parser.add_argument(
+        '-p',
+        '--pattern',
+        default='*_annotated.tsv',
+        help='File pattern to match (default: *_annotated.tsv)'
+    )
     
     args = parser.parse_args()
     
