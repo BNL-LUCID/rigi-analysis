@@ -247,6 +247,13 @@ def main():
     else:
         parser.error("Provide either --pairs or both --annotsv-dir and --dbs-data")
 
+    if len(pairs_df) == 0:
+        print(
+            "ERROR: No INV-DBS pairs found. Try increasing the "
+            "--window size or check your input data."
+        )
+        return 1
+
     result_df = evaluate_concordance(pairs_df)
     out = (Path(args.pairs).stem + '_concordance_comparison.csv'
            if args.pairs else 'concordance_comparison.csv')
