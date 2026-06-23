@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Trajectory-aware Sankey renderer.
+r"""Trajectory-aware Sankey renderer.
 
 Unlike the previous renderer, which drew per-transition ribbons with
 independent stacking at each node (causing visual artifacts where ribbons
@@ -34,7 +33,6 @@ from collections import defaultdict
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-
 
 COLUMNS = {
     0: ['W0_Present', 'W0_Absent'],

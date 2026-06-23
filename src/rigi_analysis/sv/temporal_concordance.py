@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Concordance Definition Comparison
+"""Concordance Definition Comparison.
 ===================================
 Compares two concordance definitions on existing INV-DBS pairs:
 
@@ -22,11 +21,12 @@ Or re-derive pairs from raw data (same args as original script):
         --window 10
 """
 
-import pandas as pd
-import numpy as np
-from pathlib import Path
 import argparse
 import re
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 
 # Single-timepoint radiation patterns only
 SINGLE_TIMEPOINT_PATTERNS = {'0T00': 'W1', '00T0': 'W2', '000T': 'W3'}
@@ -50,7 +50,6 @@ def timepoint_exact_match(timepoint, pattern):
 
 def evaluate_concordance(pairs_df):
     """Apply both definitions and print comparison."""
-
     pairs_df = pairs_df.copy()
     pairs_df['Concordant_Loose'] = pairs_df.apply(
         lambda r: timepoint_in_pattern(r['INV_Timepoint'], r['DBS_Pattern']), axis=1
@@ -108,7 +107,7 @@ def evaluate_concordance(pairs_df):
             print(f"  {size:<33} {loose:>9.1f}% {strict:>9.1f}%")
 
     print("-" * 70)
-    print(f"\nRandom expectation (null): 33.3%")
+    print("\nRandom expectation (null): 33.3%")
 
     return pairs_df
 

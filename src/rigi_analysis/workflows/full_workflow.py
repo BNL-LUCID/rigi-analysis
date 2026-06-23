@@ -15,7 +15,6 @@ from radical.asyncflow import WorkflowEngine
 from radical.asyncflow.logging import init_default_logger
 
 from ..utils.datetime_utils import datetime_now
-
 from .backend import get_backend
 from .mutation_workflow import MutationPipeline
 from .sv_workflow import SVPipeline
@@ -67,8 +66,8 @@ async def run_workflow() -> None:
     try:
         # Build mutation pipeline from original config
         mut_pipe = MutationPipeline(
-            name='full-mutation-pipe', 
-            config=cfg, 
+            name='full-mutation-pipe',
+            config=cfg,
             flow=flow,
             output_dir=out_mutation_dir,
         )
@@ -77,8 +76,8 @@ async def run_workflow() -> None:
         # original; then wire the mutation merged dir into it
         sv_cfg = copy.deepcopy(cfg)
         sv_pipe = SVPipeline(
-            name='full-sv-pipe', 
-            config=sv_cfg, 
+            name='full-sv-pipe',
+            config=sv_cfg,
             flow=flow,
             output_dir=out_sv_dir,
             mutation_output_dir=out_mutation_dir,

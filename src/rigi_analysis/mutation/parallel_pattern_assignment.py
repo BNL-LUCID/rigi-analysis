@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Dose-level parallel wrapper around mutation_pattern_assignment.py.
+r"""Dose-level parallel wrapper around mutation_pattern_assignment.py.
 
 Each dose's pattern computation is independent (different filtered subset,
 different output dir), so we can fan out across processes — one subprocess
@@ -35,13 +34,13 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import pandas as pd
 
-
 CONTROL_PATTERN = re.compile(r'(?:d0|D0|[Cc]ontrol)')
 
 
 def split_by_dose(input_pkl: str, work_dir: str, mutation_type: str) -> list:
     """Load annotated pickle and write one input pickle per non-control dose
-    (each containing controls + that dose). Returns list of (dose, dir) pairs."""
+    (each containing controls + that dose). Returns list of (dose, dir) pairs.
+    """
     print(f"Loading {input_pkl} ...")
     t0 = time.time()
     df = pd.read_pickle(input_pkl)

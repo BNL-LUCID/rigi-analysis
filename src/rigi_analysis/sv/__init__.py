@@ -1,3 +1,1 @@
-"""
-Structural Variant (SV) analysis pipeline modules.
-"""
+"""Structural Variant (SV) analysis pipeline modules."""

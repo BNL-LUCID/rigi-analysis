@@ -1,3 +1,1 @@
-"""
-Mutation analysis pipeline modules.
-"""
+"""Mutation analysis pipeline modules."""

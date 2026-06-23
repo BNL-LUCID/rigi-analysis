@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Parallel wrapper around mutation_annotation.py.
+"""Parallel wrapper around mutation_annotation.py.
 
 Splits the input mutations pickle into N roughly-equal chunks (by row count,
 preserving chromosome ordering), runs mutation_annotation.py on each chunk

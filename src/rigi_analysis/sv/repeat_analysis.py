@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Repeat Element Analysis - 4-Panel Streamlined Version (v2: any-breakpoint semantics)
+"""Repeat Element Analysis - 4-Panel Streamlined Version (v2: any-breakpoint semantics).
 ====================================================================================
 Clean supplementary figure showing:
 A. Repeat involvement (pie)         — Both / One / No (unchanged from v1)
@@ -17,18 +16,17 @@ Difference from v1 (`04_repeat_analysis.py`):
 Run both versions on the same input to inspect the difference.
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pathlib import Path
 import argparse
 import glob
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 # Professional color scheme (matching Figure 3)
 COLORS = {
     'INV': '#2E5A88',
-    'TRA': '#5B8DBE', 
+    'TRA': '#5B8DBE',
     'DEL': '#8C8C8C',
     'DUP': '#404040',
     'INS': '#D4D4D4',
@@ -47,7 +45,9 @@ REPEAT_COLORS = {
 }
 
 sns.set_style("whitegrid")
-plt.rcParams['font.family'] = 'Arial'
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = [
+    'Arial', 'Liberation Sans', 'DejaVu Sans', 'sans-serif']
 plt.rcParams['font.size'] = 11
 
 
@@ -114,11 +114,11 @@ def categorize_repeat(repeat_type):
 def create_sv_key(row):
     """Create unique SV key for deduplication."""
     chrom = row.get('SV_chrom', 'NA')
-    
+
     # Handle NaN values in coordinates
     start_val = row.get('SV_start', 0)
     end_val = row.get('SV_end', 0)
-    
+
     # Convert to int, handling NaN
     try:
         start = int(start_val) if pd.notna(start_val) else 0
@@ -126,9 +126,9 @@ def create_sv_key(row):
     except (ValueError, TypeError):
         start = 0
         end = 0
-    
+
     sv_type = row.get('SV_type', 'NA')
-    
+
     # Sort coordinates for inversions
     coord_key = f"{min(start,end)}-{max(start,end)}"
     return f"{chrom}:{coord_key}:{sv_type}"
@@ -137,12 +137,12 @@ def create_sv_key(row):
 def load_and_process_svs(annotsv_dir, label='Data'):
     """Load AnnotSV files and deduplicate."""
     print(f"\nLoading {label}...")
-    
+
     files = glob.glob(f"{annotsv_dir}/*.tsv")
     if not files:
         print(f"  No files found in {annotsv_dir}")
         return None
-    
+
     all_svs = []
     for f in files:
         try:
@@ -153,47 +153,46 @@ def load_and_process_svs(annotsv_dir, label='Data'):
         except Exception as e:
             print(f"  Error loading {f}: {e}")
             continue
-    
+
     if not all_svs:
         return None
-    
+
     combined = pd.concat(all_svs, ignore_index=True)
     print(f"  Loaded {len(combined):,} entries")
-    
+
     # Deduplicate
     combined['SV_key'] = combined.apply(create_sv_key, axis=1)
     deduped = combined.drop_duplicates(subset=['SV_key'])
     print(f"  After deduplication: {len(deduped):,} unique SVs")
-    
+
     return deduped
 
 
 def analyze_repeat_involvement(df):
     """Analyze repeat element involvement."""
-    
     # Find repeat columns
     repeat_cols = [c for c in df.columns if 'repeat' in c.lower()]
-    
+
     # Try to identify left and right
     left_col = None
     right_col = None
-    
+
     for col in repeat_cols:
         if 'left' in col.lower():
             left_col = col
         elif 'right' in col.lower():
             right_col = col
-    
+
     # If not found by left/right, try first two repeat columns
     if not left_col and len(repeat_cols) >= 2:
         left_col = repeat_cols[0]
         right_col = repeat_cols[1]
-    
+
     if not left_col or not right_col:
         print("  Warning: Could not find repeat columns")
         print(f"  Available columns with 'repeat': {repeat_cols}")
         return None
-    
+
     print(f"  Using columns: {left_col}, {right_col}")
 
     # Categorize repeats
@@ -242,8 +241,7 @@ def analyze_repeat_involvement(df):
 
 
 def write_categorization_csv(datasets, output_csv):
-    """
-    Write a long-form CSV capturing every raw repeat-type value seen in any
+    """Write a long-form CSV capturing every raw repeat-type value seen in any
     input file, the category it was assigned to, and how often it occurred.
 
     `datasets` is a list of `(source_label, df)` tuples — typically
@@ -299,51 +297,50 @@ def write_categorization_csv(datasets, output_csv):
 
 def create_4panel_figure(radiation_df, control_df, output):
     """Create streamlined 4-panel figure."""
-    
     print("\nCreating 4-panel figure...")
-    
+
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    
+
     # =========================================================================
     # PANEL A: Repeat Involvement (Pie Chart)
     # =========================================================================
     ax = axes[0, 0]
-    
+
     involvement = radiation_df['Repeat_Involvement'].value_counts()
     colors_pie = [REPEAT_COLORS['Other'], REPEAT_COLORS['SINE'], REPEAT_COLORS['None']]
-    
+
     wedges, texts, autotexts = ax.pie(
-        involvement.values, 
+        involvement.values,
         labels=involvement.index,
         autopct='%1.1f%%',
         colors=colors_pie,
         startangle=90,
         textprops={'fontsize': 11, 'fontweight': 'bold'}
     )
-    
+
     # Make percentage text white for better contrast
     for autotext in autotexts:
         autotext.set_color('white')
         autotext.set_fontsize(12)
         autotext.set_fontweight('bold')
-    
+
     ax.set_title('A. Repeat Involvement', fontweight='bold', fontsize=13, pad=15)
-    
+
     # =========================================================================
     # PANEL B: Repeat Categories (Bar Chart)
     # =========================================================================
     ax = axes[0, 1]
-    
+
     all_repeats = pd.concat([
         radiation_df['Left_Repeat_Cat'],
         radiation_df['Right_Repeat_Cat']
     ])
     repeat_counts = all_repeats[all_repeats != 'None'].value_counts().head(6)
-    
+
     colors_bar = [REPEAT_COLORS.get(r, '#888') for r in repeat_counts.index]
     bars = ax.barh(range(len(repeat_counts)), repeat_counts.values,
                    color=colors_bar, edgecolor='black', linewidth=1, alpha=0.85)
-    
+
     ax.set_yticks(range(len(repeat_counts)))
     ax.set_yticklabels(repeat_counts.index, fontsize=11, fontweight='bold')
     ax.set_xlabel('Count', fontsize=11, fontweight='bold')
@@ -351,26 +348,26 @@ def create_4panel_figure(radiation_df, control_df, output):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.invert_yaxis()
-    
+
     # Add value labels
     for i, (bar, val) in enumerate(zip(bars, repeat_counts.values)):
         ax.text(val * 1.02, i, f'{int(val):,}',
                va='center', ha='left', fontsize=10, fontweight='bold')
-    
+
     # =========================================================================
     # PANEL C: Repeat by SV Type (Horizontal Bar)
     # =========================================================================
     ax = axes[1, 0]
-    
+
     # v2: count any-breakpoint involvement instead of left-only
     sv_repeat = radiation_df.groupby('SV_type')['Has_Any_Repeat'].apply(
         lambda x: (x.sum() / len(x) * 100) if len(x) > 0 else 0
     ).sort_values(ascending=True)
-    
+
     colors_sv = [COLORS.get(sv, '#888') for sv in sv_repeat.index]
     bars = ax.barh(range(len(sv_repeat)), sv_repeat.values,
                    color=colors_sv, edgecolor='black', linewidth=1, alpha=0.85)
-    
+
     ax.set_yticks(range(len(sv_repeat)))
     ax.set_yticklabels(sv_repeat.index, fontsize=11, fontweight='bold')
     ax.set_xlabel('% with Repeat Element', fontsize=11, fontweight='bold')
@@ -378,43 +375,43 @@ def create_4panel_figure(radiation_df, control_df, output):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.set_xlim(0, 110)
-    
+
     # Add value labels
     for i, (bar, val) in enumerate(zip(bars, sv_repeat.values)):
         ax.text(val + 1, i, f'{val:.1f}%',
                va='center', ha='left', fontsize=10, fontweight='bold')
-    
+
     # =========================================================================
     # PANEL D: Control vs Radiation (Bar Chart with Delta)
     # =========================================================================
     ax = axes[1, 1]
-    
+
     if control_df is not None:
         # v2: any-breakpoint involvement (not left-only)
         rad_pct = (radiation_df['Has_Any_Repeat'].sum() / len(radiation_df)) * 100
         ctrl_pct = (control_df['Has_Any_Repeat'].sum() / len(control_df)) * 100
-        
+
         bars = ax.bar(['Control\n(d0)', 'Radiation'],
                      [ctrl_pct, rad_pct],
                      color=[COLORS['Control'], COLORS['Radiation']],
                      edgecolor='black', linewidth=1.5, alpha=0.85,
                      width=0.6)
-        
+
         ax.set_ylabel('% SVs with Repeat Element', fontsize=11, fontweight='bold')
         ax.set_title('D. Control vs Radiation', fontweight='bold', fontsize=13, pad=15)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.set_ylim(0, 100)
-        
+
         # Add delta annotation
         delta = rad_pct - ctrl_pct
         y_max = max(ctrl_pct, rad_pct)
         ax.plot([0, 1], [y_max+8, y_max+8], 'k-', linewidth=2)
         ax.text(0.5, y_max+12, f'Δ = {delta:+.1f}%',
                ha='center', fontsize=11, fontweight='bold',
-               bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', 
+               bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow',
                         alpha=0.4, edgecolor='black', linewidth=1))
-        
+
         # Add values on bars
         for bar, val in zip(bars, [ctrl_pct, rad_pct]):
             height = bar.get_height()
@@ -427,24 +424,24 @@ def create_4panel_figure(radiation_df, control_df, output):
                transform=ax.transAxes)
         ax.set_title('D. Control vs Radiation', fontweight='bold', fontsize=13, pad=15)
         ax.axis('off')
-    
+
     plt.tight_layout()
     plt.savefig(output, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"  Saved: {output}")
-    
+
     # Print summary stats
     print("\n" + "="*60)
     print("SUMMARY STATISTICS")
     print("="*60)
-    print(f"\nRadiation samples:")
+    print("\nRadiation samples:")
     print(f"  Total SVs: {len(radiation_df):,}")
     involvement = radiation_df['Repeat_Involvement'].value_counts()
     for cat, count in involvement.items():
         pct = 100 * count / len(radiation_df)
         print(f"  {cat}: {count:,} ({pct:.1f}%)")
-    
+
     if control_df is not None:
-        print(f"\nControl samples:")
+        print("\nControl samples:")
         print(f"  Total SVs: {len(control_df):,}")
         ctrl_involvement = control_df['Repeat_Involvement'].value_counts()
         for cat, count in ctrl_involvement.items():
@@ -453,8 +450,7 @@ def create_4panel_figure(radiation_df, control_df, output):
 
 
 def resolve_output_path(output_arg: str, default_filename: str = 'figure_s2_repeat_analysis_v2.png') -> str:
-    """
-    Accept either a file path (with .png/.pdf/.svg extension) or a directory.
+    """Accept either a file path (with .png/.pdf/.svg extension) or a directory.
 
     - If output_arg points at an existing directory, or ends with a path separator,
       or has no extension, treat it as a directory and append `default_filename`.

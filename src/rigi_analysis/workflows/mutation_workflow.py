@@ -9,13 +9,12 @@ import asyncio
 import json
 import os
 import sys
-from typing import Optional, Any
+from typing import Any, Optional
 
 from radical.asyncflow import WorkflowEngine
 from radical.asyncflow.logging import init_default_logger
 
 from ..utils.datetime_utils import datetime_now
-
 from .backend import get_backend
 
 CURRENT_DIR = os.getcwd()

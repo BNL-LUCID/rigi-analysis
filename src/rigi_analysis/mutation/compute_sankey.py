@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Compute per-dose Sankey trajectory JSONs from annotated mutations.
+r"""Compute per-dose Sankey trajectory JSONs from annotated mutations.
 
 Unlike the original compute_sankey_flows.py, which emitted pairwise
 transitions like "W1_Exposed->W2_Lost: 1234", this version emits full
@@ -46,7 +45,6 @@ import time
 
 import numpy as np
 import pandas as pd
-
 
 CONTROL_PATTERN = re.compile(r'(?:d0|D0|[Cc]ontrol)')
 
@@ -252,7 +250,7 @@ def main():
         print(f"  saved: {flows_path}")
         print(f"  elapsed: {time.time() - t_dose:.1f}s")
 
-    print(f"\n=== Combined (all doses + controls) ===")
+    print("\n=== Combined (all doses + controls) ===")
     t_combined = time.time()
     combined_states = compute_states_for_subset(df)
     out_dir = os.path.join(args.output_dir, 'combined')

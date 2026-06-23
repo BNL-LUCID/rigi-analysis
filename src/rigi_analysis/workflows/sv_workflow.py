@@ -9,13 +9,12 @@ import asyncio
 import json
 import os
 import sys
-from typing import Optional, Any
+from typing import Any, Optional
 
 from radical.asyncflow import WorkflowEngine
 from radical.asyncflow.logging import init_default_logger
 
 from ..utils.datetime_utils import datetime_now
-
 from .backend import get_backend
 
 CURRENT_DIR = os.getcwd()
@@ -107,7 +106,6 @@ class SVPipeline:
 
     def register_pipeline_tasks(self) -> None:
         """Register all pipeline tasks as asyncflow executables."""
-
         # -- Stage 1: PASS filtering -----------------------------------
 
         @self.flow.executable_task
@@ -192,7 +190,7 @@ class SVPipeline:
         @self.flow.executable_task
         async def stage_sv_mut_viz(*args):
             """Stage 8 — INV-DBS coupling figure (Fig 4)."""
-            out_png = os.path.join(self.output_dir, 
+            out_png = os.path.join(self.output_dir,
                                    'figure4_inv_dbs_unified.png')
             return ('rigi-analysis-run sv_mut_vizualization'
                     f' --correlation-dir {self.sv_correlation_dir}'
@@ -269,13 +267,13 @@ class SVPipeline:
         @self.flow.executable_task
         async def stage_dose_visualize(*args):
             """Stage 14 — Dose-response figure (Fig 5)."""
-            low_csv = os.path.join(self.dose_stratified_dir, 
+            low_csv = os.path.join(self.dose_stratified_dir,
                                    'inv_dbs_pairs_low.csv')
-            high_csv = os.path.join(self.dose_stratified_dir, 
+            high_csv = os.path.join(self.dose_stratified_dir,
                                     'inv_dbs_pairs_high.csv')
-            cat_csv = os.path.join(self.output_dir, 
+            cat_csv = os.path.join(self.output_dir,
                                    'categorized_genes.csv')
-            out_prefix = os.path.join(self.output_dir, 
+            out_prefix = os.path.join(self.output_dir,
                                    'figure5_dose_response')
             return ('rigi-analysis-run dose_based_visualize'
                     f' --inv-dbs-low {low_csv}'

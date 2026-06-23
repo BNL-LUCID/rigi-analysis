@@ -1,21 +1,21 @@
 import argparse
+import logging
 import os
 import shutil
 import tarfile
-import logging
 from typing import Optional
-from SigProfilerMatrixGenerator import install as genInstall
+
 from SigProfilerExtractor import sigpro as sig
+from SigProfilerMatrixGenerator import install as genInstall
 
 
 class SigProfilerAnalysis:
     """Run SigProfilerExtractor analysis on VCF files with genome installation."""
-    
-    def __init__(self, output_dir: str, reference_genome: str = "GRCh38", 
+
+    def __init__(self, output_dir: str, reference_genome: str = "GRCh38",
                  log_file: Optional[str] = None):
-        """
-        Initialize SigProfilerAnalysis.
-        
+        """Initialize SigProfilerAnalysis.
+
         Args:
             output_dir: Output directory for results
             reference_genome: Reference genome version (default: GRCh38)
@@ -24,11 +24,11 @@ class SigProfilerAnalysis:
         self.output_dir = output_dir
         self.reference_genome = reference_genome
         self.results = None
-        
+
         # Setup logging
         os.makedirs(output_dir, exist_ok=True)
         log_path = log_file or os.path.join(output_dir, 'sigprofiler_analysis.log')
-        
+
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
@@ -40,8 +40,7 @@ class SigProfilerAnalysis:
         self.logger = logging.getLogger(__name__)
 
     def install_reference_genome(self, offline_files_path: Optional[str] = None):
-        """
-        Install reference genome if needed.
+        """Install reference genome if needed.
 
         Args:
             offline_files_path: Path to a previously-downloaded
@@ -64,8 +63,7 @@ class SigProfilerAnalysis:
             raise
 
     def _install_from_local_tarball(self, tarball_path: str):
-        """
-        Place a local {reference_genome}.tar.gz into SigProfilerMatrixGenerator's
+        """Place a local {reference_genome}.tar.gz into SigProfilerMatrixGenerator's
         expected install directory and extract it, skipping the FTP download.
         """
         if not os.path.isfile(tarball_path):
@@ -114,8 +112,7 @@ class SigProfilerAnalysis:
         self.logger.info(f"Reference genome installed offline at: {extracted_dir}")
 
     def _flatten_chromosome_layout(self, extracted_dir: str):
-        """
-        Ensure chromosome files ('1.txt', '2.txt', ..., 'MT.txt') sit directly
+        """Ensure chromosome files ('1.txt', '2.txt', ..., 'MT.txt') sit directly
         under extracted_dir. If they are nested, walk the tree, find the
         deepest directory containing them, and lift its contents up.
         """
@@ -170,8 +167,7 @@ class SigProfilerAnalysis:
                     min_signatures: int = 1, max_signatures: int = 10,
                     nmf_replicates: int = 100, cpu_count: int = -1,
                     gpu: bool = False) -> dict:
-        """
-        Run SigProfilerExtractor analysis on VCF files.
+        """Run SigProfilerExtractor analysis on VCF files.
 
         Args:
             input_vcf: Path to input VCF files or directory
@@ -188,7 +184,7 @@ class SigProfilerAnalysis:
         if not os.path.exists(input_vcf):
             raise FileNotFoundError(f"Input VCF path not found: {input_vcf}")
 
-        self.logger.info(f"Starting SigProfilerExtractor analysis")
+        self.logger.info("Starting SigProfilerExtractor analysis")
         self.logger.info(f"Project: {project_name}")
         self.logger.info(f"Input: {input_vcf}")
         self.logger.info(f"Output: {self.output_dir}")
@@ -227,11 +223,11 @@ class SigProfilerAnalysis:
                 cpu=cpu_count,
                 gpu=gpu
             )
-            
+
             self.results = results
             self.logger.info("SigProfilerExtractor analysis completed successfully")
             return results
-            
+
         except Exception as e:
             self.logger.error(f"Error running SigProfilerExtractor: {str(e)}")
             raise
@@ -248,9 +244,9 @@ Examples:
   python sigprofiler.py -i ./filtered_vcfs -o ./results -r GRCh37 -M 10
         """
     )
-    
+
     parser.add_argument(
-        "-i", "--input", 
+        "-i", "--input",
         required=True,
         help="Input directory containing VCF files"
     )
@@ -303,18 +299,18 @@ Examples:
         "--offline-genome",
         help="Optional path to offline genome reference files"
     )
-    
+
     args = parser.parse_args()
-    
+
     try:
         analysis = SigProfilerAnalysis(
             output_dir=args.output,
             reference_genome=args.reference
         )
-        
+
         analysis.install_reference_genome(offline_files_path=args.offline_genome)
-        
-        results = analysis.run_analysis(
+
+        analysis.run_analysis(
             input_vcf=args.input,
             project_name=args.project,
             min_signatures=args.min_signatures,
@@ -323,10 +319,10 @@ Examples:
             cpu_count=args.cpu,
             gpu=args.gpu
         )
-        
+
         print("\n✓ SigProfilerExtractor analysis completed successfully!")
         print(f"Results saved to: {args.output}")
-        
+
     except Exception as e:
         print(f"\n✗ Analysis failed: {str(e)}")
         exit(1)

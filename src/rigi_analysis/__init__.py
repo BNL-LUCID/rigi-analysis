@@ -1,6 +1,4 @@
-"""
-rigi_analysis: Spatio-Temporal Analysis of Radiation-Induced Genomic Instability.
-"""
+"""rigi_analysis: Spatio-Temporal Analysis of Radiation-Induced Genomic Instability."""
 
 # Read version from _version.py
 try:
