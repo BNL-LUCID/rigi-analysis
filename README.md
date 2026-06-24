@@ -15,35 +15,44 @@ presented in the paper.
 
 ## Repository layout
 
-The pipeline has two halves that meet at one intermediate artefact:
+```
+src/rigi_analysis/
+├── mutation/       # Point-mutation pipeline (Mutect2 → SigProfiler → patterns → Sankey)
+├── sv/             # Structural-variant pipeline (Manta → AnnotSV → enrichment → figures)
+├── workflows/      # Async workflow orchestrators (MutationPipeline, SVPipeline, FullWorkflow)
+└── utils/          # Shared utilities (CLI dispatcher, datetime helpers)
+docs/
+├── mutation/       # Mutation pipeline documentation
+└── sv/             # SV pipeline documentation
+tests/              # Dry-run workflow tests (no HPC required)
+```
 
-- **`final codes_mutation/`** — point-mutation pipeline (Mutect2 → 
-  SigProfiler → temporal patterns → Sankey). Produces 
-  `*_dose_*_merged.csv` tables.
-- **`final codes SV/`** — structural-variant pipeline (Manta → AnnotSV 
-  → temporal patterns → breakpoint enrichment → dose stratification). 
-  Reads the merged CSVs from the mutation half.
-
-Run the mutation half first, then the SV half. Each folder has its own 
-README with run instructions, figure/table cross-references, and 
-dependencies.
+The two pipelines meet at an intermediate artefact: dose-merged mutation
+tables (`*_dose_*_merged.csv`) produced by the `mutation` half and consumed
+by the `sv` half. **Run the `mutation` pipeline first, then the `sv` pipeline, 
+or run the full workflow only, which will do both for you.**
 
 ## Setup
 
 ```bash
-python -m venv env
-source env/bin/activate
-pip install -r "final codes_mutation/requirements.txt"
-pip install -r "final codes SV/requirements.txt"
+conda env create -f environment.yml
+conda activate rigi_analysis
+pip install -e ".[dev]"
 ```
 
-External tools (Mutect2, Manta, AnnotSV) are documented in the per-folder 
-READMEs and `install_*.txt` notes.
+For GPU-accelerated SigProfiler runs, install the optional `gpu` extra:
+
+```bash
+pip install -e ".[gpu]"
+```
+
+Full documentation, including external tool setup (`Mutect2`, `Manta`, 
+`AnnotSV`) and pipeline run instructions, is in [`docs/`](docs/README.md).
 
 ## Citation
 
 If you use this pipeline, please cite the manuscript above. Upstream 
-tools (Mutect2, SigProfiler, Manta, AnnotSV) should also be cited 
+tools (`Mutect2`, `SigProfiler`, `Manta`, `AnnotSV`) should also be cited 
 separately — see the manuscript References section.
 
 ## Funding

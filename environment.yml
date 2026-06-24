@@ -1,0 +1,33 @@
+name: rigi_analysis
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy>=1.23
+  - pandas>=1.5
+  - scipy>=1.10
+  - intervaltree>=3.1.0
+  - requests>=2.28
+  - dask>=2023.1.0
+  - matplotlib>=3.6
+  - seaborn>=0.12
+  - joblib
+  - pytorch
+  - torchaudio
+  - torchvision
+  - bioconda::htslib
+  - bioconda::pysam
+  # Dev dependencies
+  - pytest>=7
+  - pytest-cov
+  - black
+  - ruff
+  # Pip dependencies
+  - pip
+  - pip:
+      - SigProfilerMatrixGenerator>=1.2.25
+      - SigProfilerExtractor>=1.1.24
+      - radical.asyncflow~=0.4.0
+      - rhapsody-py[dask]~=0.3.1

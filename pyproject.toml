@@ -1,0 +1,91 @@
+[build-system]
+requires = [
+    "setuptools>=77.0.3",
+    "setuptools-scm>=8",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rigi-analysis"
+dynamic = ["version"]
+description = "Spatio-Temporal Analysis of Radiation-Induced Genomic Instability"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Kriti Chopra" },
+]
+keywords = ["genomics", "mutagenesis", "radiation", "bioinformatics", "NGS"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "scipy>=1.10",
+    "intervaltree>=3.1.0",
+    "requests>=2.28",
+    "dask[dataframe]>=2023.1.0",
+    "matplotlib>=3.6",
+    "seaborn>=0.12",
+    "joblib",
+    "SigProfilerMatrixGenerator>=1.2.25",
+    "SigProfilerExtractor>=1.1.24",
+    # Pythonic wrapper for HTSlib C-API
+    "pysam",
+    # Workflow orchestration
+    "radical.asyncflow~=0.4.0",
+    "rhapsody-py[dask]~=0.3.1"
+]
+
+[project.optional-dependencies]
+
+gpu = [
+    "torch",
+    "torchvision",
+    "torchaudio"
+]
+
+dev = [
+    "pytest>=7",
+    "pytest-cov",
+    "ruff",
+]
+
+[project.scripts]
+rigi-analysis-run = "rigi_analysis.utils.cli:main"
+rigi-analysis-vcf-decompress = "rigi_analysis.utils.decompress_vcf:main"
+rigi-analysis-workflow = "rigi_analysis.workflows.full_workflow:main"
+rigi-analysis-workflow-mutation = "rigi_analysis.workflows.mutation_workflow:main"
+rigi-analysis-workflow-sv = "rigi_analysis.workflows.sv_workflow:main"
+
+[tool.setuptools]
+packages = { find = { where = ["src"] } }
+
+[tool.setuptools_scm]
+write_to = "src/rigi_analysis/_version.py"
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
