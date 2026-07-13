@@ -74,7 +74,7 @@ rigi-analysis-run repeat_analysis \
 # Step 5: Breakpoint-proximal mutation enrichment (headline analysis)
 rigi-analysis-run sv_mutation_correlation \
     --sv-catalog ./out/sv_temporal/sv_temporal_catalog.csv \
-    --mutations  "../mutation/merged" \
+    --mutations  "../mutation/merged/DBS" \
     --output     ./out/sv_correlation \
     --windows    10,25,50,100 --plot
 
