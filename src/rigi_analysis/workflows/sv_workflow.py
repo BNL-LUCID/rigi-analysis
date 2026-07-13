@@ -159,7 +159,7 @@ class SVPipeline:
             """Stage 5 — Breakpoint-proximal mutation enrichment."""
             return ('rigi-analysis-run sv_mutation_correlation'
                     f' --sv-catalog {self.sv_temporal_catalog}'
-                    f' --mutations {self.mutation_merged_dir}'
+                    f' --mutations {self.dbs_mutation_dir}'
                     f' --output {self.sv_correlation_dir}'
                     f' --windows {self.windows}'
                     f' --plot')
