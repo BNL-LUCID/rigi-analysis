@@ -64,10 +64,8 @@ class TestFullWorkflowCLI:
 
     @patch('rigi_analysis.workflows.full_workflow.run_workflow')
     def test_main(self, mock_run_workflow):
-        # Simply patch asyncio.run and run_workflow
-        with patch('asyncio.run') as mock_asyncio_run:
-            full_workflow.main()
-            mock_asyncio_run.assert_called_once()
+        full_workflow.main()
+        mock_run_workflow.assert_awaited_once()
 
 
 class TestMutationWorkflowCLI:
@@ -93,9 +91,8 @@ class TestMutationWorkflowCLI:
 
     @patch('rigi_analysis.workflows.mutation_workflow.run_workflow')
     def test_main(self, mock_run_workflow):
-        with patch('asyncio.run') as mock_asyncio_run:
-            mutation_workflow.main()
-            mock_asyncio_run.assert_called_once()
+        mutation_workflow.main()
+        mock_run_workflow.assert_awaited_once()
 
 
 class TestSVWorkflowCLI:
@@ -123,7 +120,6 @@ class TestSVWorkflowCLI:
 
     @patch('rigi_analysis.workflows.sv_workflow.run_workflow')
     def test_main(self, mock_run_workflow):
-        with patch('asyncio.run') as mock_asyncio_run:
-            sv_workflow.main()
-            mock_asyncio_run.assert_called_once()
+        sv_workflow.main()
+        mock_run_workflow.assert_awaited_once()
 
