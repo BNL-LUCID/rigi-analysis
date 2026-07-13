@@ -1,8 +1,7 @@
 [build-system]
 requires = [
-    "setuptools>=77.0.3",
-    "setuptools-scm>=8",
-    "wheel"
+    "setuptools>=80",
+    "setuptools-scm[simple]>=9.2",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -16,7 +15,13 @@ license-files = ["LICENSE"]
 authors = [
     { name = "Kriti Chopra" },
 ]
-keywords = ["genomics", "mutagenesis", "radiation", "bioinformatics", "NGS"]
+keywords = [
+    "genomics", 
+    "mutagenesis", 
+    "radiation", 
+    "bioinformatics", 
+    "NGS"
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -43,8 +48,8 @@ dependencies = [
     # Pythonic wrapper for HTSlib C-API
     "pysam",
     # Workflow orchestration
-    "radical.asyncflow~=0.4.0",
-    "rhapsody-py[dask]~=0.3.1"
+    "rhapsody-py[dask]~=0.4.0",
+    "radical.asyncflow~=0.5.0"
 ]
 
 [project.optional-dependencies]
@@ -56,10 +61,15 @@ gpu = [
 ]
 
 dev = [
-    "pytest>=7",
+    "pytest>=8.0",
     "pytest-cov",
-    "ruff",
+    "ruff>=0.15.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/BNL-LUCID/rigi-analysis"
+Repository = "https://github.com/BNL-LUCID/rigi-analysis.git"
+"Bug Tracker" = "https://github.com/BNL-LUCID/rigi-analysis/issues"
 
 [project.scripts]
 rigi-analysis-run = "rigi_analysis.utils.cli:main"
@@ -72,16 +82,21 @@ rigi-analysis-workflow-sv = "rigi_analysis.workflows.sv_workflow:main"
 packages = { find = { where = ["src"] } }
 
 [tool.setuptools_scm]
-write_to = "src/rigi_analysis/_version.py"
+local_scheme = "no-local-version"
 
 [tool.ruff]
 line-length = 80
+target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "D"]
+select = ["E", "F", "D"]
+ignore = ["D202"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

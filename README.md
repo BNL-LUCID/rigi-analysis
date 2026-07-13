@@ -1,11 +1,10 @@
-# LUCID — Spatio-Temporal Analysis of Radiation-Induced Genomic Instability
+# RIGI Analysis: Spatio-Temporal Analysis of Radiation-Induced Genomic Instability
 
 Analytical code accompanying:
 
 > **A Spatio-Temporal Analysis Framework for Characterizing 
-> Radiation-Induced Genomic Instability**
-> Chopra K., Cucinell C., Weinberg R., Forrester S., Brettin T., 
-> Kilic O. O., Yoon B. J. (2026).
+> Radiation-Induced Genomic Instability** (2026) bioRxiv 
+> [2026.02.21.707188](https://doi.org/10.64898/2026.02.21.707188)
 
 The pipeline analyses whole-genome sequencing of HUVEC cells exposed 
 to chronic low-dose gamma radiation (0.20–2.62 mGy/hr) over three 
@@ -36,7 +35,7 @@ or run the full workflow only, which will do both for you.**
 
 ```bash
 conda env create -f environment.yml
-conda activate rigi_analysis
+conda activate rigi-analysis
 pip install -e ".[dev]"
 ```
 

@@ -1,4 +1,4 @@
-name: rigi_analysis
+name: rigi-analysis
 channels:
   - conda-forge
   - bioconda
@@ -29,5 +29,5 @@ dependencies:
   - pip:
       - SigProfilerMatrixGenerator>=1.2.25
       - SigProfilerExtractor>=1.1.24
-      - radical.asyncflow~=0.4.0
-      - rhapsody-py[dask]~=0.3.1
+      - rhapsody-py[dask]~=0.4.0
+      - radical.asyncflow~=0.5.0

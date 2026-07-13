@@ -30,8 +30,5 @@ env/
 .DS_Store
 *.log
 
-# Version file
-src/rigi_analysis/_version.py
-
 # System
 .tools/

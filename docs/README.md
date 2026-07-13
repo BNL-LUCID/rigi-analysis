@@ -1,11 +1,10 @@
-# LUCID — Spatio-Temporal Analysis of Radiation-Induced Genomic Instability
+# RIGI Analysis: Spatio-Temporal Analysis of Radiation-Induced Genomic Instability
 
 Analytical code accompanying:
 
-> **A Spatio-Temporal Analysis Framework for Characterizing
-> Radiation-Induced Genomic Instability**
-> Chopra K., Cucinell C., Weinberg R., Forrester S., Brettin T.,
-> Kilic O. O., Yoon B. J. (2026).
+> **A Spatio-Temporal Analysis Framework for Characterizing 
+> Radiation-Induced Genomic Instability** (2026) bioRxiv 
+> [2026.02.21.707188](https://doi.org/10.64898/2026.02.21.707188)
 
 The pipeline analyses whole-genome sequencing of HUVEC cells exposed
 to chronic low-dose gamma radiation (0.20–2.62 mGy/hr) over three
@@ -233,12 +232,12 @@ out_full/
 
 ## Setup
 
-A unified Conda environment handles all Python dependencies for the `rigi_analysis` package.
+A unified Conda environment handles all Python dependencies for the `rigi-analysis` package.
 
 ```bash
 # From the repository root
 conda env create -f environment.yml
-conda activate rigi_analysis
+conda activate rigi-analysis
 pip install -e ".[dev]"
 ```
 
@@ -259,7 +258,7 @@ Key dependencies (all installed automatically):
 | Genomic lookups / REST | `intervaltree>=3.1.0`, `requests>=2.28` |
 | Plotting | `matplotlib>=3.6`, `seaborn>=0.12` |
 | Mutational signatures | `SigProfilerMatrixGenerator>=1.2.25`, `SigProfilerExtractor>=1.1.24` |
-| Workflow orchestration | `radical.asyncflow>=0.3.1`, `rhapsody-py[dask]>=0.2.0` |
+| Workflow orchestration | `radical.asyncflow>=0.5.0`, `rhapsody-py[dask]>=0.4.0` |
 | GPU (optional) | `torch`, `torchvision`, `torchaudio` (via `.[gpu]` extra) |
 
 ### Third-Party Tools & Data
